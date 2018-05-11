@@ -1,23 +1,20 @@
-/* Type representing a grid cell */
-type gridCellT =
-  | X
-  | O
-  | Empty;
+module Player = BsSocket.Client.Make(Common);
 
-/* State declaration.
-   The grid is a simple linear list.
-   The turn uses a gridCellT to figure out whether it's X or O's turn.
-   The winner will be a list of indices which we'll use to highlight the grid when someone won. */
-type state = {
-  grid: list(gridCellT),
-  turn: gridCellT,
-  you: gridCellT,
-  winner: option(list(int)),
-};
+let socket = Player.create();
+
+open Common;
+
+let string_of_cell = cell =>
+  switch (cell) {
+  | X => "You are X"
+  | O => "You are O"
+  | Empty => "You are no one"
+  };
 
 /* Action declaration */
 type action =
   | Restart
+  | NewState(state)
   | Click(int);
 
 /* Component template declaration.
@@ -36,14 +33,14 @@ let make = _children => {
   initialState: () => {
     grid: [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
     turn: X,
-    you: X,
+    you: Empty,
     winner: None,
   },
   /* State transitions */
   reducer: (action, state) =>
     switch (state, action) {
     | ({turn, grid}, Click(cell)) =>
-      /* Apply the action to the grid first, then we check if this new grid is in a winning state. */
+      /* Apply the action to the grid first, then we check if this new grid is in a winning state.*/
       let newGrid =
         List.mapi(
           (i, el) =>
@@ -101,6 +98,7 @@ let make = _children => {
         turn: turn === X ? O : X,
         grid: newGrid,
       });
+    | (_, NewState(newState)) => ReasonReact.Update(newState)
     | (_, Restart) =>
       /* Reset the entire state */
       ReasonReact.Update({
@@ -110,6 +108,8 @@ let make = _children => {
         winner: None,
       })
     },
+  didMount: self =>
+    Player.on(socket, Common.State, state => self.send(NewState(state))),
   render: self => {
     let yourTurn = self.state.you == self.state.turn;
     let message =
@@ -130,6 +130,7 @@ let make = _children => {
             (),
           )
         )>
+        <div> (string(string_of_cell(self.state.you))) </div>
         <div style=(ReactDOMRe.Style.make(~fontSize=px(45), ()))>
           (string(message))
         </div>
@@ -190,10 +191,18 @@ let make = _children => {
                       };
                     /* We check if the user can click here so we can hide the cursor: pointer. */
                     let canClick =
-                      canClick && yourTurn && self.state.winner == None;
+                      canClick
+                      && yourTurn
+                      && self.state.winner == None
+                      && self.state.you !== Empty;
                     <div
                       key=(string_of_int(i))
-                      onClick=(_event => canClick ? self.send(Click(i)) : ())
+                      onClick=(
+                        _event => {
+                          Player.emit(socket, Common.Movement, (X, i));
+                          canClick ? self.send(Click(i)) : ();
+                        }
+                      )
                       style=(
                         ReactDOMRe.Style.make(
                           ~display="flex",
