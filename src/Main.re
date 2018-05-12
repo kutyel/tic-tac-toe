@@ -12,7 +12,6 @@ type action =
 
 let component = ReasonReact.reducerComponent("Game");
 
-/* Helper functions for CSS properties. */
 let px = x => string_of_int(x) ++ "px";
 
 let make = _children => {
