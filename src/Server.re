@@ -1,41 +1,33 @@
-module MyServer = BsSocket.Server.Make(Common);
+module Server = BsSocket.Server.Make(Common);
 
 open Common;
 
-let connections = ref(0);
+let conns = ref(0);
 
-let initialState: Common.state = {
-  grid: [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
-  turn: X,
-  you: X,
-  winner: None,
-};
+let store = ref(initialState(X));
 
-let playerFromConnections = x => x mod 2 == 0 ? X : O;
+let getPlayer = x => x mod 2 == 0 ? O : X;
 
 let startSocketIOServer = http => {
-  let io = MyServer.createWithHttp(http);
-  MyServer.onConnect(
+  let io = Server.createWithHttp(http);
+  Server.onConnect(
     io,
     socket => {
-      incr(connections);
-      open MyServer;
-      print_endline("Got a connection!");
+      incr(conns);
+      open Server;
+      print_endline("Connected!");
       Socket.emit(
         socket,
-        Common.State,
-        {...initialState, you: playerFromConnections(connections^)},
+        State(store^),
+        {...store^, you: getPlayer(conns^)},
       );
-      /*
-       let socket = Socket.join(socket, "someRoom", e => print_endline(e));
-       let pipe = (typ, data) => {
-         Socket.broadcast(socket, typ, data);
-         Socket.emit(socket, typ, data);
-         Socket.emit(socket, Common.UnusedMessageType, data);
-       };
-       Socket.on(socket, Common.State, pipe(Common.State));
-       Socket.on(socket, Common.Movement, pipe(Common.Movement));
-       */
+      /* Socket.on(
+           socket,
+           action => {
+             store := updateState(action, store^);
+             Socket.broadcast(socket, action);
+           },
+         ); */
     },
   );
 };

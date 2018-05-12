@@ -1,15 +1,8 @@
-module Player = BsSocket.Client.Make(Common);
+module Client = BsSocket.Client.Make(Common);
 
-let socket = Player.create();
+let socket = Client.create();
 
 open Common;
-
-let string_of_cell = cell =>
-  switch (cell) {
-  | X => "You are X"
-  | O => "You are O"
-  | Empty => "You are no one"
-  };
 
 /* Action declaration */
 type action =
@@ -17,99 +10,28 @@ type action =
   | NewState(state)
   | Click(int);
 
-/* Component template declaration.
-   Needs to be **after** state and action declarations! */
 let component = ReasonReact.reducerComponent("Game");
 
 /* Helper functions for CSS properties. */
 let px = x => string_of_int(x) ++ "px";
 
-/* Main function that creates a component, which is a simple record.
-   `component` is the default record, of which we overwrite initialState, reducer and render.
-   */
 let make = _children => {
-  /* spread the other default fields of component here and override a few */
   ...component,
-  initialState: () => {
-    grid: [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
-    turn: X,
-    you: Empty,
-    winner: None,
-  },
-  /* State transitions */
+  initialState: () => initialState(Empty),
   reducer: (action, state) =>
-    switch (state, action) {
-    | ({turn, grid}, Click(cell)) =>
-      /* Apply the action to the grid first, then we check if this new grid is in a winning state.*/
-      let newGrid =
-        List.mapi(
-          (i, el) =>
-            if (cell === i) {
-              turn;
-            } else {
-              el;
-            },
-          grid,
-        );
-      let arrGrid = Array.of_list(newGrid);
-      /* Military grade, Machine Learning based, winning-condition checking algorithm:
-         just list all the possible options one by one.
-         */
-      let winner =
-        if (arrGrid[0] != Empty
-            && arrGrid[0] == arrGrid[1]
-            && arrGrid[1] == arrGrid[2]) {
-          Some([0, 1, 2]);
-        } else if (arrGrid[3] != Empty
-                   && arrGrid[3] == arrGrid[4]
-                   && arrGrid[4] == arrGrid[5]) {
-          Some([3, 4, 5]);
-        } else if (arrGrid[6] != Empty
-                   && arrGrid[6] == arrGrid[7]
-                   && arrGrid[7] == arrGrid[8]) {
-          Some([6, 7, 8]);
-        } else if (arrGrid[0] != Empty
-                   && arrGrid[0] == arrGrid[3]
-                   && arrGrid[3] == arrGrid[6]) {
-          Some([0, 3, 6]);
-        } else if (arrGrid[1] != Empty
-                   && arrGrid[1] == arrGrid[4]
-                   && arrGrid[4] == arrGrid[7]) {
-          Some([1, 4, 7]);
-        } else if (arrGrid[2] != Empty
-                   && arrGrid[2] == arrGrid[5]
-                   && arrGrid[5] == arrGrid[8]) {
-          Some([2, 5, 8]);
-        } else if (arrGrid[0] != Empty
-                   && arrGrid[0] == arrGrid[4]
-                   && arrGrid[4] == arrGrid[8]) {
-          Some([0, 4, 8]);
-        } else if (arrGrid[2] != Empty
-                   && arrGrid[2] == arrGrid[4]
-                   && arrGrid[4] == arrGrid[6]) {
-          Some([2, 4, 6]);
-        } else {
-          None;
-        };
-      /* Return new winner, new turn and new grid. */
-      ReasonReact.Update({
-        ...state,
-        winner,
-        turn: turn === X ? O : X,
-        grid: newGrid,
-      });
-    | (_, NewState(newState)) => ReasonReact.Update(newState)
-    | (_, Restart) =>
-      /* Reset the entire state */
-      ReasonReact.Update({
-        ...state,
-        grid: [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
-        turn: X,
-        winner: None,
-      })
+    switch (action) {
+    | Restart => ReasonReact.Update(updateState(Restart, state))
+    | Click(i) => ReasonReact.Update(updateState(Movement(i), state))
+    | NewState(s) => ReasonReact.Update(updateState(State(s), state))
     },
   didMount: self =>
-    Player.on(socket, Common.State, state => self.send(NewState(state))),
+    Client.on(socket, data =>
+      switch (data) {
+      | Restart => self.send(Restart)
+      | Click(cell) => self.send(Click(cell))
+      | NewState(state) => self.send(NewState(state))
+      }
+    ),
   render: self => {
     let yourTurn = self.state.you == self.state.turn;
     let message =
@@ -130,7 +52,6 @@ let make = _children => {
             (),
           )
         )>
-        <div> (string(string_of_cell(self.state.you))) </div>
         <div style=(ReactDOMRe.Style.make(~fontSize=px(45), ()))>
           (string(message))
         </div>
@@ -146,7 +67,12 @@ let make = _children => {
               (),
             )
           )
-          onClick=(_event => self.send(Restart))>
+          onClick=(
+            _event => {
+              Client.emit(socket, Restart, ());
+              self.send(Restart);
+            }
+          )>
           (string("Restart"))
         </button>
         <div
@@ -157,8 +83,6 @@ let make = _children => {
               ~height=px(443),
               ~flexWrap="wrap",
               ~justifyContent="left",
-              /*~alignItems="center",*/
-              /*~backgroundColor="black",*/
               (),
             )
           )>
@@ -199,7 +123,7 @@ let make = _children => {
                       key=(string_of_int(i))
                       onClick=(
                         _event => {
-                          Player.emit(socket, Common.Movement, (X, i));
+                          Client.emit(socket, Movement(i), ());
                           canClick ? self.send(Click(i)) : ();
                         }
                       )
