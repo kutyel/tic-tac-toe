@@ -22,21 +22,26 @@ let initialState = you => {
   you,
 };
 
-type t =
+/* Action declaration */
+type action =
   | Restart
-  | State(state)
-  | Movement(int);
+  | NewState(state)
+  | Click(int);
 
-let stringify = (type a, t) =>
+/* GADT here! */
+type t('a) =
+  | Message: t(action)
+  | State: t(state);
+
+let stringify = (type a, t: t(a)) =>
   switch (t) {
-  | State(_) => "State"
-  | Restart => "Restart"
-  | Movement(_) => "Movement"
+  | State => "State"
+  | Message => "Message"
   };
 
 let updateState = (action, state) =>
   switch (state, action) {
-  | ({turn, grid}, Movement(cell)) =>
+  | ({turn, grid}, Click(cell)) =>
     /* Apply the action to the grid first, then we check if this new grid is in a winning state.*/
     let newGrid =
       List.mapi(
@@ -91,5 +96,5 @@ let updateState = (action, state) =>
     /* Return new winner, new turn and new grid. */
     {...state, winner, turn: turn === X ? O : X, grid: newGrid};
   | (_, Restart) => initialState(state.you)
-  | (_, State(s)) => s
+  | (_, NewState(newState)) => newState
   };

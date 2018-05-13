@@ -6,6 +6,7 @@ let conns = ref(0);
 
 let store = ref(initialState(X));
 
+/* TODO: refactor this into varient with player 1, 2 and spectator */
 let getPlayer = x => x mod 2 == 0 ? O : X;
 
 let startSocketIOServer = http => {
@@ -18,16 +19,17 @@ let startSocketIOServer = http => {
       print_endline("Connected!");
       Socket.emit(
         socket,
-        State(store^),
-        {...store^, you: getPlayer(conns^)},
+        Message,
+        NewState({...store^, you: getPlayer(conns^)}),
       );
-      /* Socket.on(
-           socket,
-           action => {
-             store := updateState(action, store^);
-             Socket.broadcast(socket, action);
-           },
-         ); */
+      Socket.on(
+        socket,
+        Message,
+        action => {
+          store := updateState(action, store^);
+          Socket.broadcast(socket, Message, action);
+        },
+      );
     },
   );
 };

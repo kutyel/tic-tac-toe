@@ -4,12 +4,6 @@ let socket = Client.create();
 
 open Common;
 
-/* Action declaration */
-type action =
-  | Restart
-  | NewState(state)
-  | Click(int);
-
 let component = ReasonReact.reducerComponent("Game");
 
 let px = x => string_of_int(x) ++ "px";
@@ -20,11 +14,11 @@ let make = _children => {
   reducer: (action, state) =>
     switch (action) {
     | Restart => ReasonReact.Update(updateState(Restart, state))
-    | Click(i) => ReasonReact.Update(updateState(Movement(i), state))
-    | NewState(s) => ReasonReact.Update(updateState(State(s), state))
+    | Click(i) => ReasonReact.Update(updateState(Click(i), state))
+    | NewState(s) => ReasonReact.Update(updateState(NewState(s), state))
     },
   didMount: self =>
-    Client.on(socket, data =>
+    Client.on(socket, Message, data =>
       switch (data) {
       | Restart => self.send(Restart)
       | Click(cell) => self.send(Click(cell))
@@ -68,7 +62,7 @@ let make = _children => {
           )
           onClick=(
             _event => {
-              Client.emit(socket, Restart, ());
+              Client.emit(socket, Message, Restart);
               self.send(Restart);
             }
           )>
@@ -121,10 +115,11 @@ let make = _children => {
                     <div
                       key=(string_of_int(i))
                       onClick=(
-                        _event => {
-                          Client.emit(socket, Movement(i), ());
-                          canClick ? self.send(Click(i)) : ();
-                        }
+                        _event =>
+                          if (canClick) {
+                            Client.emit(socket, Message, Click(i));
+                            self.send(Click(i));
+                          }
                       )
                       style=(
                         ReactDOMRe.Style.make(
