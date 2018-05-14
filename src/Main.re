@@ -17,21 +17,28 @@ let make = _children => {
     | Click(i) => ReasonReact.Update(updateState(Click(i), state))
     | NewState(s) => ReasonReact.Update(updateState(NewState(s), state))
     },
-  didMount: self =>
+  didMount: ({send}) =>
     Client.on(socket, Message, data =>
       switch (data) {
-      | Restart => self.send(Restart)
-      | Click(cell) => self.send(Click(cell))
-      | NewState(state) => self.send(NewState(state))
+      | Restart => send(Restart)
+      | Click(cell) => send(Click(cell))
+      | NewState(state) => send(NewState(state))
       }
     ),
-  render: self => {
-    let yourTurn = self.state.you == self.state.turn;
+  render: ({send, state: {you, turn, grid, winner}}) => {
+    let yourTurn = you == turn;
     let message =
-      switch (self.state.winner) {
-      | None => yourTurn ? "Your turn" : "Their turn"
-      | Some([i, ..._]) =>
-        List.nth(self.state.grid, i) == X ? "X wins!" : "O wins"
+      switch (winner) {
+      | None =>
+        switch (you, yourTurn) {
+        | (X, true) => "Your turn (X)"
+        | (X, false) => "Their turn (O)"
+        | (O, true) => "Your turn (O)"
+        | (O, false) => "Their turn (X)"
+        | (Spectator(num), _) => "Spectating (" ++ string_of_int(num) ++ ")"
+        | (Empty, _) => "Game has not started yet..."
+        }
+      | Some([i, ..._]) => List.nth(grid, i) == X ? "X wins!" : "O wins"
       | _ => assert false
       };
     ReasonReact.(
@@ -63,7 +70,7 @@ let make = _children => {
           onClick=(
             _event => {
               Client.emit(socket, Message, Restart);
-              self.send(Restart);
+              send(Restart);
             }
           )>
           (string("Restart"))
@@ -88,17 +95,17 @@ let make = _children => {
                   (i, piece) => {
                     let (txt, canClick) =
                       switch (piece) {
-                      | Empty => (" ", true)
+                      | Empty
+                      | Spectator(_) => (" ", true)
                       | X => ("X", false)
                       | O => ("O", false)
                       };
                     let backgroundColor =
-                      switch (self.state.winner) {
+                      switch (winner) {
                       | None => "white"
                       | Some(winner) =>
                         let isCurrentCellWinner = List.mem(i, winner);
-                        if (isCurrentCellWinner
-                            && List.nth(self.state.grid, i) == self.state.you) {
+                        if (isCurrentCellWinner && List.nth(grid, i) == you) {
                           "green";
                         } else if (isCurrentCellWinner) {
                           "red";
@@ -107,18 +114,14 @@ let make = _children => {
                         };
                       };
                     /* We check if the user can click here so we can hide the cursor: pointer. */
-                    let canClick =
-                      canClick
-                      && yourTurn
-                      && self.state.winner == None
-                      && self.state.you !== Empty;
+                    let canClick = canClick && yourTurn && winner == None;
                     <div
                       key=(string_of_int(i))
                       onClick=(
                         _event =>
                           if (canClick) {
                             Client.emit(socket, Message, Click(i));
-                            self.send(Click(i));
+                            send(Click(i));
                           }
                       )
                       style=(
@@ -141,7 +144,7 @@ let make = _children => {
                       <span> (string(txt)) </span>
                     </div>;
                   },
-                  self.state.grid,
+                  grid,
                 ),
               ),
             )

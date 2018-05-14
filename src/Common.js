@@ -3,6 +3,7 @@
 
 var List = require("bs-platform/lib/js/list.js");
 var $$Array = require("bs-platform/lib/js/array.js");
+var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 
 function initialState(you) {
@@ -63,7 +64,7 @@ function updateState(action, state) {
             }
           }), state[/* grid */0]);
     var arrGrid = $$Array.of_list(newGrid);
-    var winner = Caml_array.caml_array_get(arrGrid, 0) !== /* Empty */2 && Caml_array.caml_array_get(arrGrid, 0) === Caml_array.caml_array_get(arrGrid, 1) && Caml_array.caml_array_get(arrGrid, 1) === Caml_array.caml_array_get(arrGrid, 2) ? /* Some */[/* :: */[
+    var winner = Caml_array.caml_array_get(arrGrid, 0) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 0), Caml_array.caml_array_get(arrGrid, 1)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 1), Caml_array.caml_array_get(arrGrid, 2)) ? /* Some */[/* :: */[
           0,
           /* :: */[
             1,
@@ -73,7 +74,7 @@ function updateState(action, state) {
             ]
           ]
         ]] : (
-        Caml_array.caml_array_get(arrGrid, 3) !== /* Empty */2 && Caml_array.caml_array_get(arrGrid, 3) === Caml_array.caml_array_get(arrGrid, 4) && Caml_array.caml_array_get(arrGrid, 4) === Caml_array.caml_array_get(arrGrid, 5) ? /* Some */[/* :: */[
+        Caml_array.caml_array_get(arrGrid, 3) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 3), Caml_array.caml_array_get(arrGrid, 4)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 4), Caml_array.caml_array_get(arrGrid, 5)) ? /* Some */[/* :: */[
               3,
               /* :: */[
                 4,
@@ -83,7 +84,7 @@ function updateState(action, state) {
                 ]
               ]
             ]] : (
-            Caml_array.caml_array_get(arrGrid, 6) !== /* Empty */2 && Caml_array.caml_array_get(arrGrid, 6) === Caml_array.caml_array_get(arrGrid, 7) && Caml_array.caml_array_get(arrGrid, 7) === Caml_array.caml_array_get(arrGrid, 8) ? /* Some */[/* :: */[
+            Caml_array.caml_array_get(arrGrid, 6) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 6), Caml_array.caml_array_get(arrGrid, 7)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 7), Caml_array.caml_array_get(arrGrid, 8)) ? /* Some */[/* :: */[
                   6,
                   /* :: */[
                     7,
@@ -93,7 +94,7 @@ function updateState(action, state) {
                     ]
                   ]
                 ]] : (
-                Caml_array.caml_array_get(arrGrid, 0) !== /* Empty */2 && Caml_array.caml_array_get(arrGrid, 0) === Caml_array.caml_array_get(arrGrid, 3) && Caml_array.caml_array_get(arrGrid, 3) === Caml_array.caml_array_get(arrGrid, 6) ? /* Some */[/* :: */[
+                Caml_array.caml_array_get(arrGrid, 0) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 0), Caml_array.caml_array_get(arrGrid, 3)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 3), Caml_array.caml_array_get(arrGrid, 6)) ? /* Some */[/* :: */[
                       0,
                       /* :: */[
                         3,
@@ -103,7 +104,7 @@ function updateState(action, state) {
                         ]
                       ]
                     ]] : (
-                    Caml_array.caml_array_get(arrGrid, 1) !== /* Empty */2 && Caml_array.caml_array_get(arrGrid, 1) === Caml_array.caml_array_get(arrGrid, 4) && Caml_array.caml_array_get(arrGrid, 4) === Caml_array.caml_array_get(arrGrid, 7) ? /* Some */[/* :: */[
+                    Caml_array.caml_array_get(arrGrid, 1) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 1), Caml_array.caml_array_get(arrGrid, 4)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 4), Caml_array.caml_array_get(arrGrid, 7)) ? /* Some */[/* :: */[
                           1,
                           /* :: */[
                             4,
@@ -113,7 +114,7 @@ function updateState(action, state) {
                             ]
                           ]
                         ]] : (
-                        Caml_array.caml_array_get(arrGrid, 2) !== /* Empty */2 && Caml_array.caml_array_get(arrGrid, 2) === Caml_array.caml_array_get(arrGrid, 5) && Caml_array.caml_array_get(arrGrid, 5) === Caml_array.caml_array_get(arrGrid, 8) ? /* Some */[/* :: */[
+                        Caml_array.caml_array_get(arrGrid, 2) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 2), Caml_array.caml_array_get(arrGrid, 5)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 5), Caml_array.caml_array_get(arrGrid, 8)) ? /* Some */[/* :: */[
                               2,
                               /* :: */[
                                 5,
@@ -123,7 +124,7 @@ function updateState(action, state) {
                                 ]
                               ]
                             ]] : (
-                            Caml_array.caml_array_get(arrGrid, 0) !== /* Empty */2 && Caml_array.caml_array_get(arrGrid, 0) === Caml_array.caml_array_get(arrGrid, 4) && Caml_array.caml_array_get(arrGrid, 4) === Caml_array.caml_array_get(arrGrid, 8) ? /* Some */[/* :: */[
+                            Caml_array.caml_array_get(arrGrid, 0) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 0), Caml_array.caml_array_get(arrGrid, 4)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 4), Caml_array.caml_array_get(arrGrid, 8)) ? /* Some */[/* :: */[
                                   0,
                                   /* :: */[
                                     4,
@@ -133,7 +134,7 @@ function updateState(action, state) {
                                     ]
                                   ]
                                 ]] : (
-                                Caml_array.caml_array_get(arrGrid, 2) !== /* Empty */2 && Caml_array.caml_array_get(arrGrid, 2) === Caml_array.caml_array_get(arrGrid, 4) && Caml_array.caml_array_get(arrGrid, 4) === Caml_array.caml_array_get(arrGrid, 6) ? /* Some */[/* :: */[
+                                Caml_array.caml_array_get(arrGrid, 2) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 2), Caml_array.caml_array_get(arrGrid, 4)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 4), Caml_array.caml_array_get(arrGrid, 6)) ? /* Some */[/* :: */[
                                       2,
                                       /* :: */[
                                         4,

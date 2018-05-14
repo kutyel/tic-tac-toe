@@ -6,6 +6,7 @@ var $$Array = require("bs-platform/lib/js/array.js");
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
+var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Client$BsSocket = require("bs-socket/src/Client.bs.js");
 var Common$TicTacToe = require("./Common.js");
@@ -27,14 +28,15 @@ function make() {
           /* reactClassInternal */component[/* reactClassInternal */1],
           /* handedOffState */component[/* handedOffState */2],
           /* willReceiveProps */component[/* willReceiveProps */3],
-          /* didMount */(function (self) {
+          /* didMount */(function (param) {
+              var send = param[/* send */3];
               return Curry._3(Client[/* on */2], socket, /* Message */0, (function (data) {
                             if (typeof data === "number") {
-                              return Curry._1(self[/* send */3], /* Restart */0);
+                              return Curry._1(send, /* Restart */0);
                             } else if (data.tag) {
-                              return Curry._1(self[/* send */3], /* Click */Block.__(1, [data[0]]));
+                              return Curry._1(send, /* Click */Block.__(1, [data[0]]));
                             } else {
-                              return Curry._1(self[/* send */3], /* NewState */Block.__(0, [data[0]]));
+                              return Curry._1(send, /* NewState */Block.__(0, [data[0]]));
                             }
                           }));
             }),
@@ -42,27 +44,44 @@ function make() {
           /* willUnmount */component[/* willUnmount */6],
           /* willUpdate */component[/* willUpdate */7],
           /* shouldUpdate */component[/* shouldUpdate */8],
-          /* render */(function (self) {
-              var yourTurn = self[/* state */1][/* you */2] === self[/* state */1][/* turn */1];
-              var match = self[/* state */1][/* winner */3];
+          /* render */(function (param) {
+              var send = param[/* send */3];
+              var match = param[/* state */1];
+              var winner = match[/* winner */3];
+              var you = match[/* you */2];
+              var grid = match[/* grid */0];
+              var yourTurn = Caml_obj.caml_equal(you, match[/* turn */1]);
               var message;
-              if (match) {
-                var match$1 = match[0];
+              if (winner) {
+                var match$1 = winner[0];
                 if (match$1) {
-                  var match$2 = List.nth(self[/* state */1][/* grid */0], match$1[0]) === /* X */0;
+                  var match$2 = List.nth(grid, match$1[0]) === /* X */0;
                   message = match$2 ? "X wins!" : "O wins";
                 } else {
                   throw [
                         Caml_builtin_exceptions.assert_failure,
                         [
                           "Main.re",
-                          35,
+                          42,
                           13
                         ]
                       ];
                 }
+              } else if (typeof you === "number") {
+                switch (you) {
+                  case 0 : 
+                      message = yourTurn ? "Your turn (X)" : "Their turn (O)";
+                      break;
+                  case 1 : 
+                      message = yourTurn ? "Your turn (O)" : "Their turn (X)";
+                      break;
+                  case 2 : 
+                      message = "Game has not started yet...";
+                      break;
+                  
+                }
               } else {
-                message = yourTurn ? "Your turn" : "Their turn";
+                message = "Spectating (" + (String(you[0]) + ")");
               }
               return React.createElement("div", {
                           style: {
@@ -86,7 +105,7 @@ function make() {
                               },
                               onClick: (function () {
                                   Curry._3(Client[/* emit */1], socket, /* Message */0, /* Restart */0);
-                                  return Curry._1(self[/* send */3], /* Restart */0);
+                                  return Curry._1(send, /* Restart */0);
                                 })
                             }, "Restart"), React.createElement("div", {
                               style: {
@@ -98,38 +117,44 @@ function make() {
                               }
                             }, $$Array.of_list(List.mapi((function (i, piece) {
                                         var match;
-                                        switch (piece) {
-                                          case 0 : 
-                                              match = /* tuple */[
-                                                "X",
-                                                false
-                                              ];
-                                              break;
-                                          case 1 : 
-                                              match = /* tuple */[
-                                                "O",
-                                                false
-                                              ];
-                                              break;
-                                          case 2 : 
-                                              match = /* tuple */[
-                                                " ",
-                                                true
-                                              ];
-                                              break;
-                                          
+                                        if (typeof piece === "number") {
+                                          switch (piece) {
+                                            case 0 : 
+                                                match = /* tuple */[
+                                                  "X",
+                                                  false
+                                                ];
+                                                break;
+                                            case 1 : 
+                                                match = /* tuple */[
+                                                  "O",
+                                                  false
+                                                ];
+                                                break;
+                                            case 2 : 
+                                                match = /* tuple */[
+                                                  " ",
+                                                  true
+                                                ];
+                                                break;
+                                            
+                                          }
+                                        } else {
+                                          match = /* tuple */[
+                                            " ",
+                                            true
+                                          ];
                                         }
-                                        var match$1 = self[/* state */1][/* winner */3];
                                         var backgroundColor;
-                                        if (match$1) {
-                                          var isCurrentCellWinner = List.mem(i, match$1[0]);
-                                          backgroundColor = isCurrentCellWinner && List.nth(self[/* state */1][/* grid */0], i) === self[/* state */1][/* you */2] ? "green" : (
+                                        if (winner) {
+                                          var isCurrentCellWinner = List.mem(i, winner[0]);
+                                          backgroundColor = isCurrentCellWinner && Caml_obj.caml_equal(List.nth(grid, i), you) ? "green" : (
                                               isCurrentCellWinner ? "red" : "white"
                                             );
                                         } else {
                                           backgroundColor = "white";
                                         }
-                                        var canClick = match[1] && yourTurn && self[/* state */1][/* winner */3] === /* None */0 && self[/* state */1][/* you */2] !== /* Empty */2;
+                                        var canClick = match[1] && yourTurn && winner === /* None */0;
                                         return React.createElement("div", {
                                                     key: String(i),
                                                     style: {
@@ -149,13 +174,13 @@ function make() {
                                                     onClick: (function () {
                                                         if (canClick) {
                                                           Curry._3(Client[/* emit */1], socket, /* Message */0, /* Click */Block.__(1, [i]));
-                                                          return Curry._1(self[/* send */3], /* Click */Block.__(1, [i]));
+                                                          return Curry._1(send, /* Click */Block.__(1, [i]));
                                                         } else {
                                                           return 0;
                                                         }
                                                       })
                                                   }, React.createElement("span", undefined, match[0]));
-                                      }), self[/* state */1][/* grid */0]))));
+                                      }), grid))));
             }),
           /* initialState */(function () {
               return Common$TicTacToe.initialState(/* Empty */2);

@@ -6,15 +6,18 @@ let conns = ref(0);
 
 let store = ref(initialState(X));
 
-/* TODO: refactor this into varient with player 1, 2 and spectator */
-let getPlayer = x => x mod 2 == 0 ? O : X;
+let getPlayer = x =>
+  switch (x) {
+  | 0 => X
+  | 1 => O
+  | _ => Spectator(x - 1)
+  };
 
 let startSocketIOServer = http => {
   let io = Server.createWithHttp(http);
   Server.onConnect(
     io,
     socket => {
-      incr(conns);
       open Server;
       print_endline("Connected!");
       Socket.emit(
@@ -22,6 +25,7 @@ let startSocketIOServer = http => {
         Message,
         NewState({...store^, you: getPlayer(conns^)}),
       );
+      incr(conns);
       Socket.on(
         socket,
         Message,

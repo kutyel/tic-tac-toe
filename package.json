@@ -3,12 +3,15 @@
   "version": "0.1.0",
   "scripts": {
     "build": "bsb -make-world",
+    "clean": "bsb -clean-world",
     "start": "bsb -make-world -w"
   },
   "keywords": [
-    "BuckleScript"
+    "TicTacToe",
+    "ReasonML",
+    "BsSocket"
   ],
-  "author": "",
+  "author": "kutyel <flaviocorpa@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "bs-socket": "reasonml-community/bs-socket.io#gadt",

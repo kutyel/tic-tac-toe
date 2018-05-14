@@ -13,9 +13,12 @@ var conns = [0];
 var store = [Common$TicTacToe.initialState(/* X */0)];
 
 function getPlayer(x) {
-  var match = x % 2 === 0;
-  if (match) {
-    return /* O */1;
+  if (x !== 0) {
+    if (x !== 1) {
+      return /* Spectator */[x - 1 | 0];
+    } else {
+      return /* O */1;
+    }
   } else {
     return /* X */0;
   }
@@ -24,7 +27,6 @@ function getPlayer(x) {
 function startSocketIOServer(http) {
   var io = Curry._1(Server[/* createWithHttp */1], http);
   return Curry._2(Server[/* onConnect */16], io, (function (socket) {
-                conns[0] = conns[0] + 1 | 0;
                 console.log("Connected!");
                 var init = store[0];
                 Curry._3(Server[/* Socket */15][/* emit */4], socket, /* Message */0, /* NewState */Block.__(0, [/* record */[
@@ -33,6 +35,7 @@ function startSocketIOServer(http) {
                           /* you */getPlayer(conns[0]),
                           /* winner */init[/* winner */3]
                         ]]));
+                conns[0] = conns[0] + 1 | 0;
                 return Curry._3(Server[/* Socket */15][/* on */3], socket, /* Message */0, (function (action) {
                               store[0] = Common$TicTacToe.updateState(action, store[0]);
                               return Curry._3(Server[/* Socket */15][/* broadcast */5], socket, /* Message */0, action);
