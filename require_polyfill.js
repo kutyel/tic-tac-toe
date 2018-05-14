@@ -1,93 +1,100 @@
 function normalizeArray(parts, allowAboveRoot) {
   // if the path tries to go above the root, `up` ends up > 0
-  var up = 0;
+  var up = 0
   for (var i = parts.length - 1; i >= 0; i--) {
-    var last = parts[i];
+    var last = parts[i]
     if (last === '.') {
-      parts.splice(i, 1);
+      parts.splice(i, 1)
     } else if (last === '..') {
-      parts.splice(i, 1);
-      up++;
+      parts.splice(i, 1)
+      up++
     } else if (up) {
-      parts.splice(i, 1);
-      up--;
+      parts.splice(i, 1)
+      up--
     }
   }
 
   // if the path is allowed to go above the root, restore leading ..s
   if (allowAboveRoot) {
     for (; up--; up) {
-      parts.unshift('..');
+      parts.unshift('..')
     }
   }
 
-  return parts;
-};
+  return parts
+}
 
 function pathNormalize(path) {
-  var isAbsolute = path.charAt(0) === '/';
-  var trailingSlash = path.substr(-1) === '/';
+  var isAbsolute = path.charAt(0) === '/'
+  var trailingSlash = path.substr(-1) === '/'
 
   // Normalize the path
-  path = normalizeArray(path.split('/').filter(function(p) {
-    return !!p;
-  }), !isAbsolute).join('/');
+  path = normalizeArray(
+    path.split('/').filter(function(p) {
+      return !!p
+    }),
+    !isAbsolute
+  ).join('/')
 
   if (!path && !isAbsolute) {
-    path = '.';
+    path = '.'
   }
   if (path && trailingSlash) {
-    path += '/';
+    path += '/'
   }
 
-  return (isAbsolute ? '/' : '') + path;
-};
-
-var globalEval = eval;
-var currentScript = document.currentScript;
-var projectRoot = currentScript.dataset['project-root'] || currentScript.dataset['projectRoot'];
-if (projectRoot == null) {
-  throw new Error('The attribute `data-project-root` isn\'t found in the script tag. You need to provide the root (in which node_modules reside).')
+  return (isAbsolute ? '/' : '') + path
 }
-var nodeModulesDir = projectRoot + '/node_modules/';
 
-var modulesCache = {};
-var packageJsonMainCache = {};
+var globalEval = eval
+var currentScript = document.currentScript
+var projectRoot =
+  currentScript.dataset['project-root'] || currentScript.dataset['projectRoot']
+if (projectRoot == null) {
+  throw new Error(
+    "The attribute `data-project-root` isn't found in the script tag. You need to provide the root (in which node_modules reside)."
+  )
+}
+var nodeModulesDir = projectRoot + '/node_modules/'
+
+var modulesCache = {}
+var packageJsonMainCache = {}
 
 var ensureEndsWithJs = function(path) {
   if (path.endsWith('.js')) {
-    return path;
+    return path
   } else {
-    return path + '.js';
+    return path + '.js'
   }
-};
+}
 
-let dir_sep = "/";
+let dir_sep = '/'
 function concat(dirname, filename) {
   if (filename[0] === dir_sep) {
-    return filename;
+    return filename
   }
 
-  var l = dirname.length;
-  if (l === 0 || dirname[l - 1 | 0] === dir_sep) {
-    return dirname + filename;
+  var l = dirname.length
+  if (l === 0 || dirname[(l - 1) | 0] === dir_sep) {
+    return dirname + filename
   } else {
-    return dirname + (dir_sep + filename);
+    return dirname + (dir_sep + filename)
   }
 }
 
 function loadScript(scriptPath) {
-  var request = new XMLHttpRequest();
-  var splitp = scriptPath.split(dir_sep);
+  var request = new XMLHttpRequest()
+  var splitp = scriptPath.split(dir_sep)
   for (let i = 0; i < splitp.length; i++) {
-    if (splitp[i] === "node_modules") {
-      scriptPath = splitp.slice(i, splitp.length).join(dir_sep);
+    if (splitp[i] === 'node_modules') {
+      scriptPath = splitp.slice(i, splitp.length).join(dir_sep)
     }
   }
-  request.open("GET", scriptPath, false); // sync
-  request.send();
-  var dirSeparatorIndex = scriptPath.lastIndexOf('/');
-  var dir = dirSeparatorIndex === -1 ? '.' : scriptPath.slice(0, dirSeparatorIndex);
+  request.open('GET', scriptPath, false) // sync
+  request.send()
+  var dirSeparatorIndex = scriptPath.lastIndexOf('/')
+  var dir =
+    dirSeparatorIndex === -1 ? '.' : scriptPath.slice(0, dirSeparatorIndex)
 
   var moduleText = `
 (function(module, exports, modulesCache, packageJsonMainCache, nodeModulesDir) {
@@ -141,9 +148,15 @@ ${request.responseText}
 // file: ${scriptPath}
 // root: ${projectRoot}
 // ----------------------------------------------------------------------
-return module.exports})\n//@ sourceURL=${scriptPath}`;
-  var module = {exports: {}};
-  return globalEval(moduleText)(module, module.exports, modulesCache, packageJsonMainCache, nodeModulesDir);
-};
+return module.exports})\n//@ sourceURL=${scriptPath}`
+  var module = { exports: {} }
+  return globalEval(moduleText)(
+    module,
+    module.exports,
+    modulesCache,
+    packageJsonMainCache,
+    nodeModulesDir
+  )
+}
 
 loadScript(currentScript.dataset.main)

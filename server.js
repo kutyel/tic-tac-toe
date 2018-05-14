@@ -11,10 +11,8 @@ startSocketIOServer(http)
 app.use(express.static(path.join(__dirname)))
 
 // Serve the main html page.
-app.get('/', function(req, res) {
+app.get('/', (req, res) =>
   res.sendFile(path.join(__dirname, 'src', 'index.html'))
-})
+)
 
-http.listen(3000, function() {
-  console.log('listening on *:3000')
-})
+http.listen(3000, () => console.log('listening on *:3000'))

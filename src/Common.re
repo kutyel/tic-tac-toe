@@ -43,16 +43,7 @@ let updateState = (action, state) =>
   switch (state, action) {
   | ({turn, grid}, Click(cell)) =>
     /* Apply the action to the grid first, then we check if this new grid is in a winning state.*/
-    let newGrid =
-      List.mapi(
-        (i, el) =>
-          if (cell === i) {
-            turn;
-          } else {
-            el;
-          },
-        grid,
-      );
+    let newGrid = List.mapi((i, el) => cell === i ? turn : el, grid);
     let arrGrid = Array.of_list(newGrid);
     /* Military grade, Machine Learning based, winning-condition checking algorithm:
        just list all the possible options one by one.

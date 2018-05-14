@@ -57,7 +57,8 @@ function updateState(action, state) {
   } else if (action.tag) {
     var cell = action[0];
     var newGrid = List.mapi((function (i, el) {
-            if (cell === i) {
+            var match = cell === i;
+            if (match) {
               return turn;
             } else {
               return el;

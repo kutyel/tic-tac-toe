@@ -30,13 +30,11 @@ let make = _children => {
     let message =
       switch (winner) {
       | None =>
-        switch (you, yourTurn) {
-        | (X, true) => "Your turn (X)"
-        | (X, false) => "Their turn (O)"
-        | (O, true) => "Your turn (O)"
-        | (O, false) => "Their turn (X)"
-        | (Spectator(num), _) => "Spectating (" ++ string_of_int(num) ++ ")"
-        | (Empty, _) => "Game has not started yet..."
+        switch (you) {
+        | X => yourTurn ? "Your turn (X)" : "Their turn (O)"
+        | O => yourTurn ? "Your turn (O)" : "Their turn (X)"
+        | Empty => "Game has not started yet..."
+        | Spectator(num) => "Spectating (" ++ string_of_int(num) ++ ")"
         }
       | Some([i, ..._]) => List.nth(grid, i) == X ? "X wins!" : "O wins"
       | _ => assert false

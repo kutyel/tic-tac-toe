@@ -62,7 +62,7 @@ function make() {
                         Caml_builtin_exceptions.assert_failure,
                         [
                           "Main.re",
-                          42,
+                          40,
                           13
                         ]
                       ];
