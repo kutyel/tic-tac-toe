@@ -119,7 +119,7 @@ function calcWinner(squares) {
 }
 
 function updateState(action, state) {
-  var prevTurn = state[/* turn */1];
+  var turn = state[/* turn */1];
   if (typeof action === "number") {
     return initialState(state[/* you */2]);
   } else if (action.tag) {
@@ -127,19 +127,17 @@ function updateState(action, state) {
     var grid = List.mapi((function (i, el) {
             var match = cell === i;
             if (match) {
-              return prevTurn;
+              return turn;
             } else {
               return el;
             }
           }), state[/* grid */0]);
-    var winner = calcWinner(grid);
-    var match = prevTurn === /* X */0;
-    var turn = match ? /* O */1 : /* X */0;
+    var match = turn === /* X */0;
     return /* record */[
             /* grid */grid,
-            /* turn */turn,
+            /* turn */match ? /* O */1 : /* X */0,
             /* you */state[/* you */2],
-            /* winner */winner
+            /* winner */calcWinner(grid)
           ];
   } else {
     return action[0];

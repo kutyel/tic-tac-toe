@@ -50,7 +50,7 @@ let lines = [
   (2, 4, 6),
 ];
 
-/* Military grade, Machine Learning based, winning-condition checking algorithm */
+/* Military grade, Machine Learning based, winning-condition checking algorithm!*/
 let calcWinner = squares =>
   Belt.List.getBy(lines, ((a, b, c)) =>
     List.nth(squares, a) != Empty
@@ -60,13 +60,11 @@ let calcWinner = squares =>
 
 let updateState = (action, state) =>
   switch (state, action) {
-  | ({turn: prevTurn, grid: prevGrid}, Click(cell)) =>
-    /* Apply the action to the grid first, then we check if this new grid is in a winning state. */
-    let grid = List.mapi((i, el) => cell === i ? prevTurn : el, prevGrid);
-    let winner = calcWinner(grid);
-    let turn = prevTurn == X ? O : X;
-    /* Return new winner, new turn and new grid. */
-    {...state, winner, turn, grid};
+  | ({turn, grid: prevGrid}, Click(cell)) =>
+    /* Apply the action to the grid first, then we check if this new grid is in a winning state.*/
+    let grid = List.mapi((i, el) => cell === i ? turn : el, prevGrid);
+    /* Return new grid, winner and turn.*/
+    {...state, grid, winner: calcWinner(grid), turn: turn == X ? O : X};
   | (_, Restart) => initialState(state.you)
   | (_, NewState(newState)) => newState
   };
