@@ -2,9 +2,8 @@
 'use strict';
 
 var List = require("bs-platform/lib/js/list.js");
-var $$Array = require("bs-platform/lib/js/array.js");
 var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
-var Caml_array = require("bs-platform/lib/js/caml_array.js");
+var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
 
 function initialState(you) {
   return /* record */[
@@ -50,6 +49,100 @@ function stringify(t) {
   }
 }
 
+var lines = /* :: */[
+  /* tuple */[
+    0,
+    1,
+    2
+  ],
+  /* :: */[
+    /* tuple */[
+      3,
+      4,
+      5
+    ],
+    /* :: */[
+      /* tuple */[
+        6,
+        7,
+        8
+      ],
+      /* :: */[
+        /* tuple */[
+          0,
+          3,
+          6
+        ],
+        /* :: */[
+          /* tuple */[
+            1,
+            4,
+            7
+          ],
+          /* :: */[
+            /* tuple */[
+              2,
+              5,
+              8
+            ],
+            /* :: */[
+              /* tuple */[
+                0,
+                4,
+                8
+              ],
+              /* :: */[
+                /* tuple */[
+                  2,
+                  4,
+                  6
+                ],
+                /* [] */0
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ]
+];
+
+function calcWinner(squares) {
+  var exit = 0;
+  var val;
+  try {
+    val = List.find((function (param) {
+            var a = param[0];
+            if (List.nth(squares, a) !== /* Empty */2 && Caml_obj.caml_equal(List.nth(squares, a), List.nth(squares, param[1]))) {
+              return Caml_obj.caml_equal(List.nth(squares, a), List.nth(squares, param[2]));
+            } else {
+              return false;
+            }
+          }), lines);
+    exit = 1;
+  }
+  catch (exn){
+    if (exn === Caml_builtin_exceptions.not_found) {
+      return /* None */0;
+    } else {
+      throw exn;
+    }
+  }
+  if (exit === 1) {
+    return /* Some */[/* :: */[
+              val[0],
+              /* :: */[
+                val[1],
+                /* :: */[
+                  val[2],
+                  /* [] */0
+                ]
+              ]
+            ]];
+  }
+  
+}
+
 function updateState(action, state) {
   var turn = state[/* turn */1];
   if (typeof action === "number") {
@@ -64,94 +157,7 @@ function updateState(action, state) {
               return el;
             }
           }), state[/* grid */0]);
-    var arrGrid = $$Array.of_list(newGrid);
-    var winner = Caml_array.caml_array_get(arrGrid, 0) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 0), Caml_array.caml_array_get(arrGrid, 1)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 1), Caml_array.caml_array_get(arrGrid, 2)) ? /* Some */[/* :: */[
-          0,
-          /* :: */[
-            1,
-            /* :: */[
-              2,
-              /* [] */0
-            ]
-          ]
-        ]] : (
-        Caml_array.caml_array_get(arrGrid, 3) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 3), Caml_array.caml_array_get(arrGrid, 4)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 4), Caml_array.caml_array_get(arrGrid, 5)) ? /* Some */[/* :: */[
-              3,
-              /* :: */[
-                4,
-                /* :: */[
-                  5,
-                  /* [] */0
-                ]
-              ]
-            ]] : (
-            Caml_array.caml_array_get(arrGrid, 6) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 6), Caml_array.caml_array_get(arrGrid, 7)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 7), Caml_array.caml_array_get(arrGrid, 8)) ? /* Some */[/* :: */[
-                  6,
-                  /* :: */[
-                    7,
-                    /* :: */[
-                      8,
-                      /* [] */0
-                    ]
-                  ]
-                ]] : (
-                Caml_array.caml_array_get(arrGrid, 0) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 0), Caml_array.caml_array_get(arrGrid, 3)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 3), Caml_array.caml_array_get(arrGrid, 6)) ? /* Some */[/* :: */[
-                      0,
-                      /* :: */[
-                        3,
-                        /* :: */[
-                          6,
-                          /* [] */0
-                        ]
-                      ]
-                    ]] : (
-                    Caml_array.caml_array_get(arrGrid, 1) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 1), Caml_array.caml_array_get(arrGrid, 4)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 4), Caml_array.caml_array_get(arrGrid, 7)) ? /* Some */[/* :: */[
-                          1,
-                          /* :: */[
-                            4,
-                            /* :: */[
-                              7,
-                              /* [] */0
-                            ]
-                          ]
-                        ]] : (
-                        Caml_array.caml_array_get(arrGrid, 2) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 2), Caml_array.caml_array_get(arrGrid, 5)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 5), Caml_array.caml_array_get(arrGrid, 8)) ? /* Some */[/* :: */[
-                              2,
-                              /* :: */[
-                                5,
-                                /* :: */[
-                                  8,
-                                  /* [] */0
-                                ]
-                              ]
-                            ]] : (
-                            Caml_array.caml_array_get(arrGrid, 0) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 0), Caml_array.caml_array_get(arrGrid, 4)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 4), Caml_array.caml_array_get(arrGrid, 8)) ? /* Some */[/* :: */[
-                                  0,
-                                  /* :: */[
-                                    4,
-                                    /* :: */[
-                                      8,
-                                      /* [] */0
-                                    ]
-                                  ]
-                                ]] : (
-                                Caml_array.caml_array_get(arrGrid, 2) !== /* Empty */2 && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 2), Caml_array.caml_array_get(arrGrid, 4)) && Caml_obj.caml_equal(Caml_array.caml_array_get(arrGrid, 4), Caml_array.caml_array_get(arrGrid, 6)) ? /* Some */[/* :: */[
-                                      2,
-                                      /* :: */[
-                                        4,
-                                        /* :: */[
-                                          6,
-                                          /* [] */0
-                                        ]
-                                      ]
-                                    ]] : /* None */0
-                              )
-                          )
-                      )
-                  )
-              )
-          )
-      );
+    var winner = calcWinner(newGrid);
     var match = turn === /* X */0;
     return /* record */[
             /* grid */newGrid,
@@ -166,5 +172,7 @@ function updateState(action, state) {
 
 exports.initialState = initialState;
 exports.stringify = stringify;
+exports.lines = lines;
+exports.calcWinner = calcWinner;
 exports.updateState = updateState;
 /* No side effect */
