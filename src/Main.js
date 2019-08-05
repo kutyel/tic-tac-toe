@@ -10,7 +10,6 @@ var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Client$BsSocket = require("bs-socket/src/Client.bs.js");
 var Common$TicTacToe = require("./Common.js");
-var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
 
 var Client = Client$BsSocket.Make([Common$TicTacToe.stringify]);
 
@@ -53,20 +52,8 @@ function make() {
               var yourTurn = Caml_obj.caml_equal(you, match[/* turn */1]);
               var message;
               if (winner) {
-                var match$1 = winner[0];
-                if (match$1) {
-                  var match$2 = List.nth(grid, match$1[0]) === /* X */0;
-                  message = match$2 ? "X wins!" : "O wins";
-                } else {
-                  throw [
-                        Caml_builtin_exceptions.assert_failure,
-                        [
-                          "Main.re",
-                          40,
-                          13
-                        ]
-                      ];
-                }
+                var match$1 = List.nth(grid, winner[0][0]) === /* X */0;
+                message = match$1 ? "X wins!" : "O wins";
               } else if (typeof you === "number") {
                 switch (you) {
                   case 0 : 
@@ -147,7 +134,17 @@ function make() {
                                         }
                                         var backgroundColor;
                                         if (winner) {
-                                          var isCurrentCellWinner = List.mem(i, winner[0]);
+                                          var match$1 = winner[0];
+                                          var isCurrentCellWinner = List.mem(i, /* :: */[
+                                                match$1[0],
+                                                /* :: */[
+                                                  match$1[1],
+                                                  /* :: */[
+                                                    match$1[2],
+                                                    /* [] */0
+                                                  ]
+                                                ]
+                                              ]);
                                           backgroundColor = isCurrentCellWinner && Caml_obj.caml_equal(List.nth(grid, i), you) ? "green" : (
                                               isCurrentCellWinner ? "red" : "white"
                                             );

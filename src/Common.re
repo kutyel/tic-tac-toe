@@ -12,7 +12,7 @@ type state = {
   grid: list(player),
   turn: player,
   you: player,
-  winner: option(list(int)),
+  winner: option((int, int, int)),
 };
 
 let initialState = you => {
@@ -50,29 +50,23 @@ let lines = [
   (2, 4, 6),
 ];
 
+/* Military grade, Machine Learning based, winning-condition checking algorithm */
 let calcWinner = squares =>
-  switch (
-    List.find(
-      ((a, b, c)) =>
-        List.nth(squares, a) != Empty
-        && List.nth(squares, a) == List.nth(squares, b)
-        && List.nth(squares, a) == List.nth(squares, c),
-      lines,
-    )
-  ) {
-  | (a, b, c) => Some([a, b, c])
-  | exception Not_found => None
-  };
+  Belt.List.getBy(lines, ((a, b, c)) =>
+    List.nth(squares, a) != Empty
+    && List.nth(squares, a) == List.nth(squares, b)
+    && List.nth(squares, a) == List.nth(squares, c)
+  );
 
 let updateState = (action, state) =>
   switch (state, action) {
-  | ({turn, grid}, Click(cell)) =>
+  | ({turn: prevTurn, grid: prevGrid}, Click(cell)) =>
     /* Apply the action to the grid first, then we check if this new grid is in a winning state. */
-    let newGrid = List.mapi((i, el) => cell === i ? turn : el, grid);
-    /* Military grade, Machine Learning based, winning-condition checking algorithm */
-    let winner = calcWinner(newGrid);
+    let grid = List.mapi((i, el) => cell === i ? prevTurn : el, prevGrid);
+    let winner = calcWinner(grid);
+    let turn = prevTurn == X ? O : X;
     /* Return new winner, new turn and new grid. */
-    {...state, winner, turn: turn === X ? O : X, grid: newGrid};
+    {...state, winner, turn, grid};
   | (_, Restart) => initialState(state.you)
   | (_, NewState(newState)) => newState
   };

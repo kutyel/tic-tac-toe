@@ -36,8 +36,7 @@ let make = _children => {
         | Empty => "Game has not started yet..."
         | Spectator(num) => "Spectating (" ++ string_of_int(num) ++ ")"
         }
-      | Some([i, ..._]) => List.nth(grid, i) == X ? "X wins!" : "O wins"
-      | _ => assert false
+      | Some((i, _, _)) => List.nth(grid, i) == X ? "X wins!" : "O wins"
       };
     ReasonReact.(
       <div
@@ -101,8 +100,8 @@ let make = _children => {
                     let backgroundColor =
                       switch (winner) {
                       | None => "white"
-                      | Some(winner) =>
-                        let isCurrentCellWinner = List.mem(i, winner);
+                      | Some((a, b, c)) =>
+                        let isCurrentCellWinner = List.mem(i, [a, b, c]);
                         if (isCurrentCellWinner && List.nth(grid, i) == you) {
                           "green";
                         } else if (isCurrentCellWinner) {

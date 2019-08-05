@@ -3,7 +3,7 @@
 
 var List = require("bs-platform/lib/js/list.js");
 var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
-var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
+var Belt_List = require("bs-platform/lib/js/belt_List.js");
 
 function initialState(you) {
   return /* record */[
@@ -108,60 +108,36 @@ var lines = /* :: */[
 ];
 
 function calcWinner(squares) {
-  var exit = 0;
-  var val;
-  try {
-    val = List.find((function (param) {
-            var a = param[0];
-            if (List.nth(squares, a) !== /* Empty */2 && Caml_obj.caml_equal(List.nth(squares, a), List.nth(squares, param[1]))) {
-              return Caml_obj.caml_equal(List.nth(squares, a), List.nth(squares, param[2]));
-            } else {
-              return false;
-            }
-          }), lines);
-    exit = 1;
-  }
-  catch (exn){
-    if (exn === Caml_builtin_exceptions.not_found) {
-      return /* None */0;
-    } else {
-      throw exn;
-    }
-  }
-  if (exit === 1) {
-    return /* Some */[/* :: */[
-              val[0],
-              /* :: */[
-                val[1],
-                /* :: */[
-                  val[2],
-                  /* [] */0
-                ]
-              ]
-            ]];
-  }
-  
+  return Belt_List.getBy(lines, (function (param) {
+                var a = param[0];
+                if (List.nth(squares, a) !== /* Empty */2 && Caml_obj.caml_equal(List.nth(squares, a), List.nth(squares, param[1]))) {
+                  return Caml_obj.caml_equal(List.nth(squares, a), List.nth(squares, param[2]));
+                } else {
+                  return false;
+                }
+              }));
 }
 
 function updateState(action, state) {
-  var turn = state[/* turn */1];
+  var prevTurn = state[/* turn */1];
   if (typeof action === "number") {
     return initialState(state[/* you */2]);
   } else if (action.tag) {
     var cell = action[0];
-    var newGrid = List.mapi((function (i, el) {
+    var grid = List.mapi((function (i, el) {
             var match = cell === i;
             if (match) {
-              return turn;
+              return prevTurn;
             } else {
               return el;
             }
           }), state[/* grid */0]);
-    var winner = calcWinner(newGrid);
-    var match = turn === /* X */0;
+    var winner = calcWinner(grid);
+    var match = prevTurn === /* X */0;
+    var turn = match ? /* O */1 : /* X */0;
     return /* record */[
-            /* grid */newGrid,
-            /* turn */match ? /* O */1 : /* X */0,
+            /* grid */grid,
+            /* turn */turn,
             /* you */state[/* you */2],
             /* winner */winner
           ];
